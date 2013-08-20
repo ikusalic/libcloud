@@ -238,6 +238,39 @@ class EC2Tests(LibcloudTestCase, TestCaseMixin):
                                        image=image, size=size,
                                        ex_blockdevicemappings=mappings)
 
+    def test_ex_create_node_with_ex_security_groups(self):
+        image = NodeImage(id='ami-be3adfd7',
+                          name=self.image_name,
+                          driver=self.driver)
+        size = NodeSize('m1.small', 'Small Instance', None, None, None, None,
+                        driver=self.driver)
+        groups = [ 'group-1', 'group-2' ]
+        node = self.driver.create_node(name='foo', image=image, size=size,
+                                       ex_security_groups=groups)
+        self.assertEqual(node.id, 'i-2ba64342')
+
+    def test_ex_create_node_with_ex_security_groups_only_one_group(self):
+        image = NodeImage(id='ami-be3adfd7',
+                          name=self.image_name,
+                          driver=self.driver)
+        size = NodeSize('m1.small', 'Small Instance', None, None, None, None,
+                        driver=self.driver)
+        groups = 'group-1'
+        node = self.driver.create_node(name='foo', image=image, size=size,
+                                       ex_security_groups=groups)
+        self.assertEqual(node.id, 'i-2ba64342')
+
+    def test_ex_create_node_with_ex_security_groups_attribute_error(self):
+        image = NodeImage(id='ami-be3adfd7',
+                          name=self.image_name,
+                          driver=self.driver)
+        size = NodeSize('m1.small', 'Small Instance', None, None, None, None,
+                        driver=self.driver)
+        groups = {'this should be': [ 'list', 'str' ]}
+        self.assertRaises(AttributeError, self.driver.create_node, name='foo',
+            image=image, size=size,
+            ex_security_groups=groups)
+
     def test_destroy_node(self):
         node = Node('i-4382922a', None, None, None, None, self.driver)
         ret = self.driver.destroy_node(node)
